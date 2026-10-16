@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sayfa Değişiklik Takipçi</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      padding: 24px 32px;
+      border-bottom: 1px solid #2a2a4a;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header h1 {
+      font-size: 22px;
+      color: #7c83ff;
+      font-weight: 700;
+    }
+    .header .dot {
+      width: 10px; height: 10px;
+      background: #4caf50;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* Ekleme formu */
+    .add-form {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .add-form h2 {
+      font-size: 16px;
+      color: #7c83ff;
+      margin-bottom: 16px;
+    }
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .form-row input {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #2a2a4a;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-row input:focus {
+      border-color: #7c83ff;
+    }
+    .form-row input::placeholder { color: #555; }
+
+    .mail-hint {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #888;
+      min-height: 16px;
+    }
+    .monitor-emails {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #8a8ab0;
+      word-break: break-word;
+    }
+
+    .form-row select {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #2a2a4a;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #7c83ff;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #6a70e6; }
+
+    /* Takip listesi */
+    .monitor-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .monitor-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 20px 24px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .monitor-card.changed {
+      border-color: #ff6b6b;
+      box-shadow: 0 0 20px rgba(255, 107, 107, 0.15);
+      animation: glow 1s ease-in-out 3;
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.15); }
+      50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.35); }
+    }
+
+    .monitor-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .monitor-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .monitor-url {
+      font-size: 12px;
+      color: #666;
+      word-break: break-all;
+      margin-top: 4px;
+    }
+    .monitor-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+
+    .interval-select {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #2a2a4a;
+      background: #0f0f1a;
+      color: #aaa;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .interval-select:hover, .interval-select:focus { background: #2a2a4a; color: #fff; outline: none; }
+
+    .btn-sm {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid #2a2a4a;
+      background: transparent;
+      color: #aaa;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-sm:hover { background: #2a2a4a; color: #fff; }
+    .btn-sm.danger:hover { background: #ff4757; border-color: #ff4757; color: #fff; }
+
+    .monitor-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: #888;
+    }
+    .monitor-meta span { display: flex; align-items: center; gap: 6px; }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-dot.aktif { background: #4caf50; }
+    .status-dot.beklemede { background: #ff9800; }
+    .status-dot.hata { background: #ff4757; }
+    .status-dot.degisti { background: #ff6b6b; animation: pulse 0.5s infinite; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #555;
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+
+    /* Bildirim paneli */
+    .notifications {
+      margin-top: 32px;
+    }
+    .notifications h2 {
+      font-size: 16px;
+      color: #ff6b6b;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notif-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .notif-item {
+      background: #1e1a2e;
+      border: 1px solid #3a2a4a;
+      border-left: 3px solid #ff6b6b;
+      border-radius: 8px;
+      padding: 14px 18px;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .notif-time {
+      font-size: 11px;
+      color: #ff6b6b;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .notif-msg { font-size: 13px; color: #ccc; }
+    .notif-msg a { color: #7c83ff; text-decoration: none; }
+    .notif-msg a:hover { text-decoration: underline; }
+
+    .diff-box {
+      margin-top: 10px;
+      background: #12121f;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #2a2a4a;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .diff-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      letter-spacing: 0.5px;
+    }
+    .diff-section-title.added { background: #1a3a1a; color: #4caf50; }
+    .diff-section-title.removed { background: #3a1a1a; color: #ff4757; }
+    .diff-line {
+      font-size: 12px;
+      font-family: 'Menlo', 'Consolas', monospace;
+      padding: 4px 12px;
+      border-bottom: 1px solid #1a1a2e;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .diff-line.added { background: rgba(76, 175, 80, 0.08); color: #81c784; }
+    .diff-line.removed { background: rgba(255, 71, 87, 0.08); color: #e57373; text-decoration: line-through; }
+    .diff-line:last-child { border-bottom: none; }
+    .diff-toggle {
+      font-size: 11px;
+      color: #7c83ff;
+      cursor: pointer;
+      margin-top: 6px;
+      display: inline-block;
+      user-select: none;
+    }
+    .diff-toggle:hover { text-decoration: underline; }
+
+    .notif-empty {
+      text-align: center;
+      padding: 30px;
+      color: #444;
+      font-size: 13px;
+    }
+
+    .sound-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 50%;
+      width: 48px; height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+    .sound-toggle:hover { border-color: #7c83ff; }
+    .sound-toggle.muted { opacity: 0.4; }
+
+    .count-badge {
+      background: #ff6b6b;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .sound-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #ff6b6b;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 200;
+      display: none;
+      animation: flashBar 0.8s infinite;
+    }
+    @keyframes flashBar {
+      0%, 100% { background: #ff6b6b; }
+      50% { background: #ff4757; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="dot"></div>
+  <h1>Sayfa Değişiklik Takipçi</h1>
+</div>
+
+<div class="container">
+  <div class="add-form">
+    <h2>+ Yeni Sayfa Ekle</h2>
+    <div class="form-row">
+      <input type="text" id="nameInput" placeholder="İsim (ör: Duyurular Sayfası)" />
+      <input type="text" id="urlInput" placeholder="https://..." />
+      <select id="intervalInput">
+        <option value="15000">15 saniye</option>
+        <option value="30000" selected>30 saniye</option>
+        <option value="60000">1 dakika</option>
+        <option value="120000">2 dakika</option>
+        <option value="300000">5 dakika</option>
+        <option value="1800000">30 dakika</option>
+        <option value="3600000">1 saat</option>
+      </select>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <input type="text" id="emailInput" placeholder="Bu sayfa için bildirim e-postaları (virgülle ayırın)" />
+      <button class="btn btn-primary" onclick="addMonitor()">Takibe Al</button>
+      <button class="btn" style="background:#2f7d4f;color:#fff" onclick="sendTestMail()" title="Girilen adreslere test maili gönder">📧 Test Maili</button>
+      <button class="btn" style="background:#2a2a4a;color:#aaa" onclick="unlockAudio();playSound();">🔊 Sesi Test Et</button>
+    </div>
+    <div class="mail-hint" id="mailHint"></div>
+  </div>
+
+  <div class="monitor-list" id="monitorList">
+    <div class="empty-state">
+      <div class="icon">👁️</div>
+      <p>Henüz takip edilen sayfa yok.</p>
+    </div>
+  </div>
+
+  <div class="notifications">
+    <h2>🔔 Değişiklik Bildirimleri <span class="count-badge" id="notifCount" style="display:none">0</span></h2>
+    <div class="notif-list" id="notifList">
+      <div class="notif-empty">Henüz değişiklik algılanmadı.</div>
+    </div>
+  </div>
+</div>
+
+<button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Ses Aç/Kapat">🔔</button>
+<div class="sound-bar" id="soundBar" onclick="dismissBar()">⚠️ DEĞİŞİKLİK ALGILANDI! — Tıkla ve sesi aç</div>
+
+<script>
+  let soundEnabled = true;
+  let audioUnlocked = false;
+  let audioCtx = null;
+  const notifs = [];
+  let pendingNotifs = [];
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0.001;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.01);
+
+      audioUnlocked = true;
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+
+      if (pendingNotifs.length) {
+        pendingNotifs.forEach((n) => playSound());
+        pendingNotifs = [];
+      }
+    } catch (e) {}
+  }
+  document.addEventListener('click', unlockAudio);
+  document.addEventListener('touchstart', unlockAudio);
+
+  function playSound() {
+    if (!soundEnabled) return;
+    if (!audioUnlocked) {
+      pendingNotifs.push(true);
+      return;
+    }
+    try {
+      if (!audioCtx || audioCtx.state === 'closed') {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      function beep(freq, startTime, dur, vol) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol || 0.35, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + dur);
+      }
+
+      const now = audioCtx.currentTime;
+      beep(880, now, 0.15, 0.4);
+      beep(1100, now + 0.15, 0.15, 0.4);
+      beep(880, now + 0.3, 0.15, 0.4);
+      beep(1320, now + 0.5, 0.25, 0.5);
+      beep(1500, now + 0.75, 0.15, 0.35);
+      beep(1100, now + 0.95, 0.3, 0.45);
+    } catch (e) {}
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    const btn = document.getElementById('soundToggle');
+    btn.textContent = soundEnabled ? '🔔' : '🔕';
+    btn.classList.toggle('muted', !soundEnabled);
+  }
+
+  function showBar(text) {
+    const bar = document.getElementById('soundBar');
+    bar.textContent = '⚠️ ' + text;
+    bar.style.display = 'block';
+  }
+  function dismissBar() {
+    document.getElementById('soundBar').style.display = 'none';
+    unlockAudio();
+    playSound();
+  }
+
+  function renderMonitors(list) {
+    const el = document.getElementById('monitorList');
+    if (!list.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">👁️</div><p>Henüz takip edilen sayfa yok.</p></div>';
+      return;
+    }
+    el.innerHTML = list.map(m => `
+      <div class="monitor-card" id="card-${m.id}">
+        <div class="monitor-top">
+          <div>
+            <div class="monitor-name">${esc(m.name)}</div>
+            <div class="monitor-url">${esc(m.url)}</div>
+          </div>
+          <div class="monitor-actions">
+            <select class="interval-select" onchange="updateInterval('${m.id}', this.value)" title="Kontrol aralığı">
+              ${intervalOptions(m.interval)}
+            </select>
+            <button class="btn-sm" onclick="editEmails('${m.id}')">📧 Mail</button>
+            <button class="btn-sm" onclick="toggleMonitor('${m.id}')">${m.active ? '⏸ Durdur' : '▶ Devam'}</button>
+            <button class="btn-sm danger" onclick="deleteMonitor('${m.id}')">✕ Sil</button>
+          </div>
+        </div>
+        <div class="monitor-meta">
+          <span><span class="status-dot ${m.status}"></span> ${statusLabel(m.status)}</span>
+          <span>Son kontrol: ${m.lastCheck || '—'}</span>
+          ${m.lastChange ? `<span style="color:#ff6b6b">Son değişiklik: ${m.lastChange}</span>` : ''}
+          ${m.error ? `<span style="color:#ff4757">Hata: ${esc(m.error)}</span>` : ''}
+        </div>
+        <div class="monitor-emails">
+          📧 ${m.emails && m.emails.length ? esc(m.emails.join(', ')) : '<span style="color:#ff9f43">Alıcı yok — mail gönderilmez</span>'}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function statusLabel(s) {
+    return { aktif: 'Aktif', beklemede: 'Beklemede', hata: 'Hata', degisti: 'Değişiklik!' }[s] || s;
+  }
+
+  const INTERVALS = [
+    [10000, '10 saniye'],
+    [15000, '15 saniye'],
+    [30000, '30 saniye'],
+    [60000, '1 dakika'],
+    [120000, '2 dakika'],
+    [300000, '5 dakika'],
+    [1800000, '30 dakika'],
+    [3600000, '1 saat'],
+  ];
+
+  function intervalOptions(current) {
+    return INTERVALS.map(([v, l]) =>
+      `<option value="${v}" ${Number(current) === v ? 'selected' : ''}>${l}</option>`
+    ).join('');
+  }
+
+  async function updateInterval(id, value) {
+    await fetch(`/api/monitors/${id}/interval`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ interval: parseInt(value) }),
+    });
+    loadMonitors();
+  }
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  async function addMonitor() {
+    const name = document.getElementById('nameInput').value.trim();
+    const url = document.getElementById('urlInput').value.trim();
+    const interval = parseInt(document.getElementById('intervalInput').value);
+    const emails = document.getElementById('emailInput').value.trim();
+    if (!url) return alert('URL giriniz.');
+
+    await fetch('/api/monitors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name || url, url, interval, emails }),
+    });
+
+    document.getElementById('nameInput').value = '';
+    document.getElementById('urlInput').value = '';
+    document.getElementById('emailInput').value = '';
+    loadMonitors();
+  }
+
+  async function editEmails(id) {
+    const res = await fetch('/api/monitors');
+    const list = await res.json();
+    const m = list.find((x) => x.id === id);
+    const current = m && m.emails ? m.emails.join(', ') : '';
+    const input = prompt('Bu sayfa için bildirim e-postaları (virgülle ayırın):', current);
+    if (input === null) return;
+    await fetch(`/api/monitors/${id}/emails`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails: input }),
+    });
+    loadMonitors();
+  }
+
+  async function sendTestMail() {
+    const emails = document.getElementById('emailInput').value.trim();
+    const hint = document.getElementById('mailHint');
+    hint.textContent = 'Test maili gönderiliyor...';
+    hint.style.color = '#aaa';
+    try {
+      const res = await fetch('/api/test-mail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emails }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        hint.textContent = `✅ Test maili gönderildi: ${data.to.join(', ')}`;
+        hint.style.color = '#4cd964';
+      } else {
+        hint.textContent = `❌ Gönderilemedi: ${data.error}`;
+        hint.style.color = '#ff4757';
+      }
+    } catch (err) {
+      hint.textContent = `❌ Hata: ${err.message}`;
+      hint.style.color = '#ff4757';
+    }
+  }
+
+  async function toggleMonitor(id) {
+    await fetch(`/api/monitors/${id}/toggle`, { method: 'PATCH' });
+    loadMonitors();
+  }
+
+  async function deleteMonitor(id) {
+    if (!confirm('Bu takibi silmek istediğinize emin misiniz?')) return;
+    await fetch(`/api/monitors/${id}`, { method: 'DELETE' });
+    loadMonitors();
+  }
+
+  async function loadMonitors() {
+    const res = await fetch('/api/monitors');
+    const data = await res.json();
+    renderMonitors(data);
+  }
+
+  function addNotification(data) {
+    notifs.unshift(data);
+    renderNotifs();
+    const card = document.getElementById(`card-${data.id}`);
+    if (card) {
+      card.classList.add('changed');
+      setTimeout(() => card.classList.remove('changed'), 3000);
+    }
+    showBar(data.message);
+    loadMonitors();
+  }
+
+  function renderNotifs() {
+    const el = document.getElementById('notifList');
+    const badge = document.getElementById('notifCount');
+    badge.textContent = notifs.length;
+    badge.style.display = notifs.length ? 'inline' : 'none';
+
+    el.innerHTML = notifs.map((n, i) => {
+      let diffHtml = '';
+      if (n.diff) {
+        const { added, removed } = n.diff;
+        if (added.length || removed.length) {
+          diffHtml = `<div class="diff-toggle" onclick="toggleDiff(${i})">▶ Değişiklik Detaylarını Göster</div>
+          <div class="diff-box" id="diff-${i}" style="display:none">`;
+          if (removed.length) {
+            diffHtml += `<div class="diff-section-title removed">✕ KALDIRILAN (${removed.length})</div>`;
+            removed.forEach(t => { diffHtml += `<div class="diff-line removed">- ${esc(t)}</div>`; });
+          }
+          if (added.length) {
+            diffHtml += `<div class="diff-section-title added">＋ EKLENEN (${added.length})</div>`;
+            added.forEach(t => { diffHtml += `<div class="diff-line added">+ ${esc(t)}</div>`; });
+          }
+          diffHtml += `</div>`;
+        }
+      }
+      return `
+        <div class="notif-item">
+          <div class="notif-time">🕐 ${n.time}</div>
+          <div class="notif-msg">${esc(n.message)} <a href="${esc(n.url)}" target="_blank">Sayfayı Aç →</a></div>
+          ${diffHtml}
+        </div>`;
+    }).join('');
+  }
+
+  function toggleDiff(i) {
+    const box = document.getElementById(`diff-${i}`);
+    if (!box) return;
+    const show = box.style.display === 'none';
+    box.style.display = show ? 'block' : 'none';
+    const toggle = box.previousElementSibling;
+    if (toggle) toggle.textContent = show ? '▼ Değişiklik Detaylarını Gizle' : '▶ Değişiklik Detaylarını Göster';
+  }
+
+  // SSE
+  const evtSource = new EventSource('/api/events');
+
+  evtSource.addEventListener('change', (e) => {
+    const data = JSON.parse(e.data);
+    playSound();
+    addNotification(data);
+  });
+
+  evtSource.addEventListener('status', () => loadMonitors());
+  evtSource.addEventListener('added', () => loadMonitors());
+  evtSource.addEventListener('updated', () => loadMonitors());
+  evtSource.addEventListener('removed', () => loadMonitors());
+
+  async function checkMailStatus() {
+    const hint = document.getElementById('mailHint');
+    try {
+      const res = await fetch('/api/mail-status');
+      const data = await res.json();
+      if (data.ready) {
+        hint.textContent = '📧 Mail servisi hazır (.env). Alıcıları aşağıya girin.';
+        hint.style.color = '#4cd964';
+      } else {
+        hint.textContent = '⚠️ Mail servisi kapalı. .env içinde MAIL_ENABLED=true ve MAIL_USER/MAIL_PASS ayarlayın.';
+        hint.style.color = '#ff9f43';
+      }
+    } catch {
+      /* yoksay */
+    }
+  }
+
+  loadMonitors();
+  checkMailStatus();
+</script>
+
+</body>
+</html>

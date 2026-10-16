@@ -1,0 +1,16 @@
+# Bağımlılıklar
+node_modules/
+
+# Gizli / hassas veriler — ASLA pushlama
+.env
+
+# Yerel veriler (e-postalar + izleme durumu)
+data.json
+
+# Loglar
+*.log
+
+# Sistem / IDE
+.DS_Store
+.idea/
+.vscode/
